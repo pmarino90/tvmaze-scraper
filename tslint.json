@@ -1,0 +1,24 @@
+{
+    "extends": [
+      "tslint:recommended",
+      "tslint-immutable",
+      "tslint-config-prettier"
+    ],
+    "rules": {
+      "no-unused-expression": [
+        true,
+        "allow-tagged-template",
+        "allow-fast-null-checks"
+      ],
+      "object-literal-sort-keys": false,
+      "member-access": [true, "no-public"],
+      "interface-name": [true, "never-prefix"],
+      "variable-name": [true, "allow-leading-underscore", "allow-pascal-case"],
+      "class-name": false,
+      "jsx-no-lambda": false,
+      "max-classes-per-file": false
+    },
+    "linterOptions": {
+      "exclude": ["**/*.json"]
+    }
+  }

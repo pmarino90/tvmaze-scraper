@@ -1,0 +1,24 @@
+{
+  "name": "tvmaze-api",
+  "version": "0.1.0",
+  "description": "Simple TV Shows API",
+  "main": "index.js",
+  "author": "Paolo Marino",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "$(yarn bin)/tsc",
+    "watch:dev": "$(yarn bin)/nodemon",
+    "start:dev": "$(yarn bin)/ts-node src/server.ts"
+  },
+  "devDependencies": {
+    "@types/express": "^4.16.0",
+    "nodemon": "^1.18.4",
+    "prettier": "^1.14.3",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.1.2"
+  },
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}
