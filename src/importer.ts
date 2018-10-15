@@ -1,7 +1,6 @@
 import { tuple } from "fp-ts/lib/function";
 import { none, Option, option, some } from "fp-ts/lib/Option";
 import { Task, task } from "fp-ts/lib/Task";
-import { taskEither, TaskEither } from "fp-ts/lib/TaskEither";
 import { sequence } from "fp-ts/lib/Traversable";
 import {
   capDelay,
@@ -12,6 +11,7 @@ import {
 import { retrying } from "retry-ts/lib/TaskEither";
 
 import { array } from "fp-ts/lib/Array";
+import { insertShows } from "./database";
 import { ClientError, get } from "./fetch";
 import { CastMember, Show } from "./types/model/show";
 import { TVMazeCastMember } from "./types/TVMazeApiResponse/TVMazeCastMember";
@@ -118,30 +118,35 @@ const setError = (status: Status, error: Option<ClientError>): Status => ({
 
 const setCast = (show: Show, cast: CastMember[]): Show => ({ ...show, cast });
 
+const retrievePage = (status: Status): Task<Status> => {
+  console.log(`Requesting page ${status.currentPage}...`);
+
+  return fetchShowPage(status.currentPage).fold(
+    error => setError(status, some(error)),
+    items => hydrateShows(status, items)
+  );
+};
+
+const retrieveCast = (status: Status): Task<Status> => {
+  console.log(`Requesting cast members..`);
+  return sequence(task, array)(
+    status.items.map(show =>
+      fetchShowCastMembers(show).fold(() => show, cast => setCast(show, cast))
+    )
+  ).map(shows => collectShows(status, shows));
+};
+
+const persistShow = (status: Status): Task<Status> => {
+  return new Task(() => insertShows(status.items)).map(() => status);
+};
+
 function scrapeShowsApi(): Task<[Show[], Option<FetchError>]> {
-  const runPageRetreival = (status: Status): Task<Status> => {
-    console.log(`Requesting page ${status.currentPage}...`);
-
-    return fetchShowPage(status.currentPage).fold(
-      error => setError(status, some(error)),
-      items => hydrateShows(status, items)
-    );
-  };
-
-  const runCastRetrieval = (status: Status): Task<Status> => {
-    console.log(`Requesting cast members..`);
-    return sequence(task, array)(
-      status.items.map(show =>
-        fetchShowCastMembers(show).fold(() => show, cast => setCast(show, cast))
-      )
-    ).map(shows => collectShows(status, shows));
-  };
-
   const run = (status: Status): Task<[Show[], Option<FetchError>]> => {
     return status.error.foldL(
       () =>
-        runPageRetreival(status)
-          .chain(runCastRetrieval)
+        retrievePage(status)
+          .chain(retrieveCast)
+          .chain(persistShow)
           .chain(run),
       error =>
         task.of(
@@ -163,4 +168,4 @@ function scrapeShowsApi(): Task<[Show[], Option<FetchError>]> {
 
 scrapeShowsApi()
   .run()
-  .then(data => console.log(data));
+  .then(data => console.log("Done!"));
