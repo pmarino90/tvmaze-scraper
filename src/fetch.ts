@@ -1,9 +1,6 @@
-import { Either, either, left, right } from "fp-ts/lib/Either";
-import { tuple } from "fp-ts/lib/function";
-import { none, Option, option, some } from "fp-ts/lib/Option";
-import { Task, task } from "fp-ts/lib/Task";
-import { TaskEither, taskEither } from "fp-ts/lib/TaskEither";
-import { sequence } from "fp-ts/lib/Traversable";
+import { Either, left, right } from "fp-ts/lib/Either";
+import { Task } from "fp-ts/lib/Task";
+import { TaskEither } from "fp-ts/lib/TaskEither";
 import fetch, { Response } from "node-fetch";
 
 export type Mixed =
