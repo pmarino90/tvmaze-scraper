@@ -8,6 +8,7 @@
   "private": true,
   "scripts": {
     "build": "$(yarn bin)/tsc",
+    "run:importer": "$(yarn bin)/ts-node src/importer.ts",
     "watch:dev": "$(yarn bin)/nodemon",
     "start:dev": "$(yarn bin)/ts-node src/server.ts"
   },
@@ -16,9 +17,16 @@
     "nodemon": "^1.18.4",
     "prettier": "^1.14.3",
     "ts-node": "^7.0.1",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.15.0",
+    "tslint-immutable": "^4.8.0",
     "typescript": "^3.1.2"
   },
   "dependencies": {
-    "express": "^4.16.4"
+    "@types/node-fetch": "^2.1.2",
+    "express": "^4.16.4",
+    "fp-ts": "^1.9.0",
+    "node-fetch": "^2.2.0",
+    "retry-ts": "^0.0.1"
   }
 }
