@@ -1,4 +1,4 @@
-export interface TVMazeShowResponse {
+export interface TVMazeShow {
   id: number;
   url: string;
   name: string;
