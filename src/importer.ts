@@ -1,10 +1,8 @@
-import { Either, either, left, right } from "fp-ts/lib/Either";
 import { tuple } from "fp-ts/lib/function";
 import { none, Option, option, some } from "fp-ts/lib/Option";
 import { Task, task } from "fp-ts/lib/Task";
-import { TaskEither, taskEither } from "fp-ts/lib/TaskEither";
+import { taskEither, TaskEither } from "fp-ts/lib/TaskEither";
 import { sequence } from "fp-ts/lib/Traversable";
-import fetch, { Response } from "node-fetch";
 import {
   capDelay,
   exponentialBackoff,
@@ -13,7 +11,8 @@ import {
 } from "retry-ts";
 import { retrying } from "retry-ts/lib/TaskEither";
 
-import { ClientError, get, Mixed } from "./fetch";
+import { array } from "fp-ts/lib/Array";
+import { ClientError, get } from "./fetch";
 import { CastMember, Show } from "./types/model/show";
 import { TVMazeCastMember } from "./types/TVMazeApiResponse/TVMazeCastMember";
 import { TVMazeShow } from "./types/TVMazeApiResponse/TVMazeShow";
@@ -37,9 +36,11 @@ const policy = capDelay(
   )
 );
 
+// However this must have proper validation to ensure type is correct
 const parseShowsResponse = (items: TVMazeShow[]): Show[] =>
   items.map(({ id, name }) => ({ id, name, cast: [] }));
 
+// However this must have proper validation to ensure type is correct
 const parseCastMembersResponse = (items: TVMazeCastMember[]): CastMember[] =>
   items.map(({ person }) => ({
     id: person.id,
@@ -140,7 +141,3 @@ function scrapeShowsApi(): Task<[Show[], Option<FetchError>]> {
 
   return run(initialStatus);
 }
-
-scrapeShowsApi()
-  .run()
-  .then(([shows, error]) => console.log(`Total shows: ${shows.length}`));
