@@ -13,37 +13,14 @@ import {
 } from "retry-ts";
 import { retrying } from "retry-ts/lib/TaskEither";
 
-import { TVMazeCastMember } from "./types/TVMazeCastMember";
-import { TVMazeShow } from "./types/TVMazeShow";
+import { ClientError, get, Mixed } from "./fetch";
+import { CastMember, Show } from "./types/model/show";
+import { TVMazeCastMember } from "./types/TVMazeApiResponse/TVMazeCastMember";
+import { TVMazeShow } from "./types/TVMazeApiResponse/TVMazeShow";
 
 const RETRY_DELAY = 5000;
 const RETRY_BACKOFF = 1000;
 const RETRY_TIMES = 5;
-
-export type Mixed =
-  | { [key: string]: any }
-  | object
-  | number
-  | string
-  | boolean
-  | null;
-
-interface ClientError {
-  type: string;
-}
-
-interface CastMember {
-  id: number;
-  name: string;
-  birthday: string;
-}
-
-interface Show {
-  id: number;
-  name: string;
-  cast: CastMember[];
-}
-
 interface Status {
   currentPage: number;
   items: Show[];
@@ -52,29 +29,6 @@ interface Status {
 
 type FetchError = "unknownError" | "retryError";
 
-export class NotFoundError implements ClientError {
-  readonly type: "NotFoundError" = "NotFoundError";
-  constructor(readonly url: string, readonly response: Response) {}
-}
-
-export class RateLimitError implements ClientError {
-  readonly type: "RateLimitError" = "RateLimitError";
-  constructor(url: string, readonly response: Response) {}
-}
-
-export class UnknownError implements ClientError {
-  readonly type: "UnknownError" = "UnknownError";
-  constructor(url: string, readonly response: Response) {}
-}
-
-const parseBody = (body: string): Mixed => {
-  try {
-    return JSON.parse(body);
-  } catch (err) {
-    return body;
-  }
-};
-
 const policy = capDelay(
   RETRY_DELAY,
   monoidRetryPolicy.concat(
@@ -82,36 +36,6 @@ const policy = capDelay(
     limitRetries(RETRY_TIMES)
   )
 );
-
-const buildRequest = <T>(
-  method: string,
-  url: string
-): Task<Either<ClientError, T>> =>
-  new Task(() =>
-    fetch(url, { method })
-      .then(response =>
-        response
-          .text()
-          .then(parseBody)
-          .then(body => ({ response, body }))
-      )
-      .then(({ response, body }) => {
-        if (response.ok) {
-          return right<ClientError, T>(body as T);
-        }
-
-        if (response.status === 404) {
-          throw new NotFoundError(url, response);
-        } else if (response.status === 429) {
-          throw new RateLimitError(url, response);
-        } else if (response.status >= 500) {
-          throw new UnknownError(url, response);
-        }
-      })
-      .catch(err => left<ClientError, T>(err))
-  );
-
-const get = <T>(url: string) => new TaskEither(buildRequest<T>("GET", url));
 
 const parseShowsResponse = (items: TVMazeShow[]): Show[] =>
   items.map(({ id, name }) => ({ id, name, cast: [] }));
