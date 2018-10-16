@@ -1,3 +1,4 @@
+import { array } from "fp-ts/lib/Array";
 import { tuple } from "fp-ts/lib/function";
 import { none, Option, some } from "fp-ts/lib/Option";
 import { Task, task } from "fp-ts/lib/Task";
@@ -10,7 +11,6 @@ import {
 } from "retry-ts";
 import { retrying } from "retry-ts/lib/TaskEither";
 
-import { array } from "fp-ts/lib/Array";
 import { insertShows } from "./database";
 import { ClientError, get } from "./fetch";
 import { CastMember, Show } from "./types/model/show";
