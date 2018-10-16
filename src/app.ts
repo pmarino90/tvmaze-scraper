@@ -1,5 +1,8 @@
-import express from 'express'
+import express from "express";
+import showController from "./controllers/show";
 
 const app = express();
 
-export default app
+app.use("/", showController);
+
+export default app;
