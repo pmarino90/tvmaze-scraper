@@ -2,8 +2,6 @@ import { Pool } from "pg";
 
 import { Show } from "./types/model/show";
 
-// pools will use environment variables
-// for connection information
 const pool = new Pool({
   user: "tvmaze",
   host: "localhost",
@@ -39,5 +37,34 @@ export const insertShows = (shows: Show[]) => {
         )
     )
   ).then(() => pool.end());
-  // you can also use async/await
+};
+
+export const getShows = (limit: number, offset: number) => {
+  return pool
+    .query("SELECT s.id, s.name FROM shows s LIMIT $1 OFFSET $2", [
+      limit,
+      offset
+    ])
+    .then(response =>
+      Promise.all(
+        response.rows.map(show =>
+          pool
+            .query(
+              `
+            SELECT
+                c.id,
+                c.name,
+                c.birthday
+            FROM
+                cast_members c
+                INNER JOIN shows_cast_members scm ON c.id = scm.cast_member_id
+                WHERE
+                    scm.show_id = $1
+                ORDER BY c.birthday DESC NULLS LAST`,
+              [show.id]
+            )
+            .then(data => ({ ...show, cast: data.rows }))
+        )
+      )
+    );
 };
