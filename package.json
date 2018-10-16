@@ -24,9 +24,11 @@
   },
   "dependencies": {
     "@types/node-fetch": "^2.1.2",
+    "@types/pg": "^7.4.11",
     "express": "^4.16.4",
     "fp-ts": "^1.9.0",
     "node-fetch": "^2.2.0",
+    "pg": "^7.5.0",
     "retry-ts": "^0.0.1"
   }
 }
