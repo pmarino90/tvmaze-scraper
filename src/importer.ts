@@ -1,5 +1,5 @@
 import { tuple } from "fp-ts/lib/function";
-import { none, Option, option, some } from "fp-ts/lib/Option";
+import { none, Option, some } from "fp-ts/lib/Option";
 import { Task, task } from "fp-ts/lib/Task";
 import { sequence } from "fp-ts/lib/Traversable";
 import {
